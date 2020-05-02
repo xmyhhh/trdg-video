@@ -289,7 +289,7 @@ def parse_arguments():
         type=int,
         nargs="?",
         help="Define how many string get close together",
-        default=2
+        default=3
     )
     parser.add_argument(
         "-csa",
@@ -297,7 +297,7 @@ def parse_arguments():
         type=int,
         nargs="?",
         help="Define how string get close together,Horizontal =0 & vertical!=0",
-        default=1
+        default=0
     )
     parser.add_argument(
         "-fsn",
@@ -313,7 +313,7 @@ def parse_arguments():
         type=int,
         nargs="?",
         help="Define string number in one pic",
-        default=3
+        default=5
     )
     parser.add_argument(
         "-id",
@@ -488,7 +488,8 @@ def main():
                 [args.font_size] * string_count,
                 [args.string_num] * string_count,
                 [args.close_string_num] * string_count,
-                [args.font_size_min] * string_count
+                [args.font_size_min] * string_count,
+                [args.close_string_arrangement] * string_count
             ),
         ),
         total=args.count,

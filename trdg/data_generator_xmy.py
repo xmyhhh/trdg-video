@@ -46,7 +46,8 @@ class FakeTextDataGenerator(object):
         font_size,
         string_num,
         close_string_num,
-        font_size_min
+        font_size_min,
+        close_string_arrangement
     ):
         text_imageList=[]
         text_maskList=[]
@@ -120,11 +121,16 @@ class FakeTextDataGenerator(object):
         def getClosePoint(background_img, text_image,stringAreaDict,arrangement):
             import random
             if arrangement==0: #horizontal
-                x = random.randint(stringAreaDict["point_up_left"][0]-text_image.size[0], stringAreaDict["point_down_right"][0])
+                if( stringAreaDict["point_down_right"][0]-text_image.size[0]>stringAreaDict["point_up_left"][0]):
+                    x = random.randint(stringAreaDict["point_up_left"][0],
+                                       stringAreaDict["point_down_right"][0]-text_image.size[0])
+                else:
+                    x = random.randint(stringAreaDict["point_down_right"][0] - text_image.size[0],
+                                       stringAreaDict["point_up_left"][0])
                 if random.randint(0,1)==0:#up
-                    y = stringAreaDict["point_up_left"][1]-text_image.size[1]
+                    y = max(0,stringAreaDict["point_up_left"][1]-text_image.size[1])
                 else :  #down
-                    y = stringAreaDict["point_down_right"][1]
+                    y = min(stringAreaDict["point_down_right"][1],background_img.size[1]-text_image.size[1])
             else : #Vertical
                 y = random.randint(stringAreaDict["point_up_left"][1] - text_image.size[1],
                                    stringAreaDict["point_down_right"][1])
@@ -132,7 +138,6 @@ class FakeTextDataGenerator(object):
                     x = stringAreaDict["point_up_left"][0] - text_image.size[0]
                 else:  # right
                     x = stringAreaDict["point_down_right"][0]
-
             return x, y
         def isCross(x0,y0,text_image,stringArea):
             for i in range(4):
@@ -181,9 +186,9 @@ class FakeTextDataGenerator(object):
                     stringArea.append(AreaDict)
                     head_stringAreaDict=AreaDict
                 else :
-                    x0, y0 = getClosePoint(background_img, text_image,head_stringAreaDict,1)
+                    x0, y0 = getClosePoint(background_img, text_image,head_stringAreaDict,close_string_arrangement)
                     while (isCross(x0, y0, text_image, stringArea)):
-                        x0, y0 = getClosePoint(background_img, text_image,head_stringAreaDict,1)
+                        x0, y0 = getClosePoint(background_img, text_image,head_stringAreaDict,close_string_arrangement)
                     background_img.paste(text_image, (x0, y0), text_image)
                     AreaDict = {}
                     AreaDict['text'] = stringList[idx]
