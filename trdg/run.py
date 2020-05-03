@@ -372,6 +372,8 @@ def load_fonts(lang):
         return [os.path.join('fonts/hi', font) for font in os.listdir('fonts/hi')]
     elif lang == 'jp':
         return [os.path.join('fonts/jp', font) for font in os.listdir('fonts/jp')]
+    elif lang == 'kr':
+        return [os.path.join('fonts/kr', font) for font in os.listdir('fonts/kr')]
     else:
         return [os.path.join('fonts/latin', font) for font in os.listdir('fonts/latin')]
 
