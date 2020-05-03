@@ -160,24 +160,31 @@ class FakeTextDataGenerator(object):
         def alignment(background_img,text_imageList,image_dir):
             stringArea=[]
             for text_image  in text_imageList:
+                i=0
                 while(background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
                     background_img = background_generator.image(image_dir)#change a big back pic
+                    i+=1
+                    if i==10:
+                        return None,None
             head_stringAreaDict={}
             for idx, text_image in enumerate(text_imageList):
                 if close_string_num==1:#string area non-relate
                     x0, y0 =getPoint(background_img,text_image)
                     while(isCross(x0,y0,text_image,stringArea)):
                         x0,y0=getPoint(background_img,text_image)
+
                     background_img.paste(text_image, (x0, y0), text_image)
                     AreaDict= {}
                     AreaDict['text']=stringList[idx]
                     AreaDict['point_up_left']=[x0,y0]
                     AreaDict['point_down_right']=[x0+text_image.size[0],y0+text_image.size[1]]
                     stringArea.append(AreaDict)
+
                 elif (idx+1) % close_string_num==1 :#head of close string
                     x0, y0 = getPoint(background_img, text_image)
                     while (isCross(x0, y0, text_image, stringArea)):
                         x0, y0 = getPoint(background_img, text_image)
+
                     background_img.paste(text_image, (x0, y0), text_image)
                     AreaDict = {}
                     AreaDict['text'] = stringList[idx]
@@ -208,29 +215,30 @@ class FakeTextDataGenerator(object):
         #####################################
         # Generate name for resulting image #
         #####################################
-        if name_format == 0:
-            image_name = "{}.{}".format(str(index), extension)
-        elif name_format == 1:
-            image_name = "{}_{}.{}".format(str(index), text, extension)
-        elif name_format == 2:
-            image_name = "{}.{}".format(str(index), extension)
-        else:
-            print("{} is not a valid name format. Using default.".format(name_format))
-            image_name = "{}_{}.{}".format(text, str(index), extension)
+        if final_image!=None:
+            if name_format == 0:
+                image_name = "{}.{}".format(str(index), extension)
+            elif name_format == 1:
+                image_name = "{}_{}.{}".format(str(index), text, extension)
+            elif name_format == 2:
+                image_name = "{}.{}".format(str(index), extension)
+            else:
+                print("{} is not a valid name format. Using default.".format(name_format))
+                image_name = "{}_{}.{}".format(text, str(index), extension)
 
-        # Save the image
-        if out_dir is not None:
-            final_image.convert("RGB").save(os.path.join(out_dir, image_name))
-        else:
-            return final_image.convert("RGB")
-         #save gt
-        import utils
-        gt={}
-        annotations={}
-        for idx,Area in enumerate(stringArea):
-            annotations[str(idx)]=Area
-        gt['img_name']=image_name
-        gt['annotations']=annotations
-        import json
-        utils.file_create("out/"+image_name.replace(extension,"json"),json.dumps(gt))
+            # Save the image
+            if out_dir is not None:
+                final_image.convert("RGB").save(os.path.join(out_dir, image_name))
+            else:
+                return final_image.convert("RGB")
+             #save gt
+            import utils
+            gt={}
+            annotations={}
+            for idx,Area in enumerate(stringArea):
+                annotations[str(idx)]=Area
+            gt['img_name']=image_name
+            gt['annotations']=annotations
+            import json
+            utils.file_create("out/"+image_name.replace(extension,"json"),json.dumps(gt))
 

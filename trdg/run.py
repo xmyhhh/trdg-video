@@ -264,7 +264,7 @@ def parse_arguments():
         type=margins,
         nargs="?",
         help="Define the margins around the text when rendered. In pixels",
-        default=(5, 5, 5, 5),
+        default=(10, 10, 5, 5),
     )
     parser.add_argument(
         "-fi",
@@ -289,7 +289,7 @@ def parse_arguments():
         type=int,
         nargs="?",
         help="Define how many string get close together",
-        default=3
+        default=1
     )
     parser.add_argument(
         "-csa",
@@ -300,7 +300,7 @@ def parse_arguments():
         default=0
     )
     parser.add_argument(
-        "-fsn",
+        "-fsm",
         "--font_size_min",
         type=int,
         nargs="?",
@@ -313,7 +313,7 @@ def parse_arguments():
         type=int,
         nargs="?",
         help="Define string number in one pic",
-        default=5
+        default=3
     )
     parser.add_argument(
         "-id",
@@ -324,7 +324,7 @@ def parse_arguments():
         default=os.path.join(os.path.split(os.path.realpath(__file__))[0], "images")
     )
     parser.add_argument(
-        "-font_size",
+        "-fs",
         "--font_size",
         type=int,
         nargs="?",
