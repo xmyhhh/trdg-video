@@ -148,24 +148,42 @@ class FakeTextDataGenerator(object):
                     x=x0
                     y=y0+text_image.size[1]
                 elif i==2:
-                    x=x0+text_image.size[2]
+                    x=x0+text_image.size[0]
                     y=y0
                 else:
                     x=x0
                     y=y0
                 for Area in stringArea:
-                    if((Area["point_up_left"][0]<x and Area["point_up_left"][1]<y and Area["point_down_right"][0]>x and Area["point_down_right"][1]>y)):
+                    if((Area["point_up_left"][0]<=x and Area["point_up_left"][1]<=y and Area["point_down_right"][0]>=x and Area["point_down_right"][1]>=y)):
                         return True
-                return  False
+
+            for j in stringArea:
+                for i in range(4):
+                    if i == 0:
+                        x = j["point_up_left"][0]
+                        y = j["point_up_left"][1]
+                    elif i == 1:
+                        x = j["point_down_right"][0]
+                        y = j["point_up_left"][1]
+                    elif i == 2:
+                        x = j["point_down_right"][0]
+                        y = j["point_down_right"][1]
+                    else:
+                        x = j["point_up_left"][0]
+                        y = j["point_down_right"][1]
+                    if ((x0 <= x and y0 <= y and x0+text_image.size[0]
+                        >= x and y0+text_image.size[1] >= y)):
+                        return True
+            return  False
         def alignment(background_img,text_imageList,image_dir):
             stringArea=[]
             for text_image  in text_imageList:
-                i=0
-                while(background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
-                    background_img = background_generator.image(image_dir)#change a big back pic
-                    i+=1
-                    if i==10:
-                        return None,None
+                i = 0
+                while (background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
+                    background_img = background_generator.image(image_dir)  # change a big back pic
+                    i += 1
+                    if i == 10:
+                        return None, None
             head_stringAreaDict={}
             for idx, text_image in enumerate(text_imageList):
                 if close_string_num==1:#string area non-relate
@@ -241,4 +259,5 @@ class FakeTextDataGenerator(object):
             gt['annotations']=annotations
             import json
             utils.file_create("out/"+image_name.replace(extension,"json"),json.dumps(gt))
-
+        else:
+            print("None img")
