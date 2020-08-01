@@ -53,7 +53,7 @@ class FakeTextDataGenerator(object):
         ##########################
         background_img = background_generator.image(image_dir)
        #西瓜视频
-
+        stringArea = []
         for idx,stringFormat in enumerate(load_dict['stringFormats']):
             string = ''
             for j in range(stringFormat['length']):
@@ -73,8 +73,7 @@ class FakeTextDataGenerator(object):
             #############################
             # Place text with alignment #
             #############################
-            def alignment(background_img,text_image,x0,y0,image_dir):
-                stringArea=[]
+            def alignment(background_img,text_image,x0,y0,image_dir,text):
                 for text_image  in text_imageList:
                     i = 0
                     while (background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
@@ -84,12 +83,13 @@ class FakeTextDataGenerator(object):
                             return None, None
                 background_img.paste(text_image, (x0, y0), text_image)
                 AreaDict= {}
-                AreaDict['text']="x"
+                AreaDict['text']=text
                 AreaDict['point_up_left']=[x0,y0]
                 AreaDict['point_down_right']=[x0+text_image.size[0],y0+text_image.size[1]]
-                stringArea.append(AreaDict)
-                return background_img,stringArea
-            final_image,stringArea =alignment(background_img,text_image,stringFormat['position']['x'],stringFormat['position']['y'],image_dir)
+
+                return background_img,AreaDict
+            final_image,AreaDict =alignment(background_img,text_image,stringFormat['position']['x'],stringFormat['position']['y'],image_dir,string)
+            stringArea.append(AreaDict)
             background_img=final_image
         #####################################
         # Generate name for resulting image #

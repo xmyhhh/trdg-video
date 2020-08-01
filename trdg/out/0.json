@@ -1,1 +1,1 @@
-{"img_name": "0.jpg", "annotations": {"0": {"text": "x", "point_up_left": [300, 500], "point_down_right": [618, 529]}}}
+{"img_name": "0.jpg", "annotations": {"0": {"text": "\u4ee4 \u8457 \u88dd", "point_up_left": [800, 40], "point_down_right": [894, 69]}, "1": {"text": " \u8457 \u88dd \u6211", "point_up_left": [60, 500], "point_down_right": [154, 529]}, "2": {"text": " \u88dd \u6211 \u7247 \u7ffb \u652f \u99ac \u5806 \u4f86 \u8acb \u7f77", "point_up_left": [300, 500], "point_down_right": [617, 529]}}}
