@@ -52,7 +52,7 @@ def parse_arguments():
         type=str,
         nargs="?",
         help="The language to use, should be fr (French), en (English), es (Spanish), de (German), ar (Arabic), cn (Chinese), or hi (Hindi)",
-        default="en"
+        default="cn"
     )
     parser.add_argument(
         "-c",
@@ -90,14 +90,7 @@ def parse_arguments():
         help="Define if random sequences should contain symbols. Only works with -rs",
         default=False,
     )
-    parser.add_argument(
-        "-w",
-        "--length",
-        type=int,
-        nargs="?",
-        help="Define how many words should be included in each generated sample. If the text source is Wikipedia, this is the MINIMUM length",
-        default=2,
-    )
+
     parser.add_argument(
         "-r",
         "--random",
@@ -226,38 +219,10 @@ def parse_arguments():
         help="Define the alignment of the text in the image. Only used if the width parameter is set. 0: left, 1: center, 2: right",
         default=3,
     )
-    parser.add_argument(
-        "-or",
-        "--orientation",
-        type=int,
-        nargs="?",
-        help="Define the orientation of the text. 0: Horizontal, 1: Vertical",
-        default=0,
-    )
-    parser.add_argument(
-        "-tc",
-        "--text_color",
-        type=str,
-        nargs="?",
-        help="Define the text's color, should be either a single hex color or a range in the ?,? format.",
-        default="#282828",
-    )
-    parser.add_argument(
-        "-sw",
-        "--space_width",
-        type=float,
-        nargs="?",
-        help="Define the width of the spaces between words. 2.0 means twice the normal space width",
-        default=1.0,
-    )
-    parser.add_argument(
-        "-cs",
-        "--character_spacing",
-        type=int,
-        nargs="?",
-        help="Define the width of the spaces between characters. 2 means two pixels",
-        default=0,
-    )
+
+
+
+
     parser.add_argument(
         "-m",
         "--margins",
@@ -271,7 +236,7 @@ def parse_arguments():
         "--fit",
         action="store_true",
         help="Apply a tight crop around the rendered text",
-        default=False
+        default=True
     )
     parser.add_argument(
         "-ft", "--font", type=str, nargs="?", help="Define font to be used"
@@ -283,38 +248,10 @@ def parse_arguments():
         nargs="?",
         help="Define a font directory to be used",
     )
-    parser.add_argument(
-        "-csn",
-        "--close_string_num",
-        type=int,
-        nargs="?",
-        help="Define how many string get close together",
-        default=1
-    )
-    parser.add_argument(
-        "-csa",
-        "--close_string_arrangement",
-        type=int,
-        nargs="?",
-        help="Define how string get close together,Horizontal =0 & vertical!=0",
-        default=0
-    )
-    parser.add_argument(
-        "-fsm",
-        "--font_size_min",
-        type=int,
-        nargs="?",
-        help="Define if font size random change and the min of font size,if font_size_random!=-1 then font_size will be the max of font size",
-        default=-1
-    )
-    parser.add_argument(
-        "-string_num",
-        "--string_num",
-        type=int,
-        nargs="?",
-        help="Define string number in one pic",
-        default=3
-    )
+
+
+
+
     parser.add_argument(
         "-id",
         "--image_dir",
@@ -323,14 +260,7 @@ def parse_arguments():
         help="Define an image directory to use when background is set to image",
         default=os.path.join(os.path.split(os.path.realpath(__file__))[0], "images")
     )
-    parser.add_argument(
-        "-fs",
-        "--font_size",
-        type=int,
-        nargs="?",
-        help="Define font size  if -1,font_size will be auto ",
-        default=-1
-    )
+
     parser.add_argument(
         "-ca",
         "--case",
@@ -421,6 +351,14 @@ def main():
     # Creating synthetic sentences (or word)
     strings = []
 
+    # json read
+    import json
+    with open("./format/format1.json", 'r') as load_f:
+        formatDict = json.load(load_f)
+    stringLength=0
+    for stringFormat in formatDict['stringFormats']:
+        stringLength+=stringFormat['length']
+
     if args.use_wikipedia:
         strings = create_strings_from_wikipedia(args.length, args.count, args.language)
     elif args.input_file != "":
@@ -444,7 +382,7 @@ def main():
             args.name_format = 2
     else:
         strings = create_strings_from_dict(
-            args.length, args.random, args.count,args.string_num, lang_dict
+            stringLength, args.random, args.count,1, lang_dict
         )
 
     if args.language == 'ar':
@@ -480,20 +418,14 @@ def main():
                 [args.name_format] * string_count,
                 [args.width] * string_count,
                 [args.alignment] * string_count,
-                [args.text_color] * string_count,
-                [args.orientation] * string_count,
-                [args.space_width] * string_count,
-                [args.character_spacing] * string_count,
+
                 [args.margins] * string_count,
                 [args.fit] * string_count,
                 [args.output_mask] * string_count,
                 [args.word_split] * string_count,
                 [args.image_dir] * string_count,
-                [args.font_size] * string_count,
-                [args.string_num] * string_count,
-                [args.close_string_num] * string_count,
-                [args.font_size_min] * string_count,
-                [args.close_string_arrangement] * string_count
+
+                [formatDict] * string_count
             ),
         ),
         total=args.count,

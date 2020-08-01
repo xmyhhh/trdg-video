@@ -34,20 +34,12 @@ class FakeTextDataGenerator(object):
         name_format,
         width,
         alignment,
-        text_color,
-        orientation,
-        space_width,
-        character_spacing,
         margins,
         fit,
         output_mask,
         word_split,
         image_dir,
-        font_size,
-        string_num,
-        close_string_num,
-        font_size_min,
-        close_string_arrangement
+        load_dict
     ):
         text_imageList=[]
         text_maskList=[]
@@ -55,181 +47,50 @@ class FakeTextDataGenerator(object):
         string=''
         words=text.split('\n')
         del words[len(words)-1]
-        ave_length=int(len(words)/string_num)
-        for j in range(string_num):
-            for i in range(ave_length):
-                string+=words[i+j*ave_length]
-            stringList.append(string)
-            string=''
+
         ##########################
         # Create picture of text and backgroundImg #
         ##########################
         background_img = background_generator.image(image_dir)
-        for i in range(string_num):
-            if font_size_min==-1:
-                if font_size == -1 :#auto
-                    text_image, text_mask = computer_text_generator.generate(
-                        stringList[i],
-                        font,
-                        text_color,
-                        int(background_img.size[1]/16),
-                        orientation,
-                        space_width,
-                        character_spacing,
-                        fit,
-                        word_split,
-                    )
-                    text_imageList.append(text_image)
-                    text_maskList.append(text_mask)
-                else : #const
-                    text_image, text_mask = computer_text_generator.generate(
-                        stringList[i],
-                        font,
-                        text_color,
-                        font_size,
-                        orientation,
-                        space_width,
-                        character_spacing,
-                        fit,
-                        word_split,
-                    )
-                    text_imageList.append(text_image)
-                    text_maskList.append(text_mask)
-            else :#random
-                import random
-                text_image, text_mask = computer_text_generator.generate(
-                    stringList[i],
-                    font,
-                    text_color,
-                    random.randint(font_size_min,font_size),
-                    orientation,
-                    space_width,
-                    character_spacing,
-                    fit,
-                    word_split,
-                )
-                text_imageList.append(text_image)
-                text_maskList.append(text_mask)
-        #############################
-        # Place text with alignment #
-        #############################
-        def getPoint(background_img,text_image):
-            import random
-            x = random.randint(0, background_img.size[0] - text_image.size[0])
-            y = random.randint(0, background_img.size[1] - text_image.size[1])
-            return x,y
-        def getClosePoint(background_img, text_image,stringAreaDict,arrangement):
-            import random
-            if arrangement==0: #horizontal
-                if( stringAreaDict["point_down_right"][0]-text_image.size[0]>stringAreaDict["point_up_left"][0]):
-                    x = random.randint(stringAreaDict["point_up_left"][0],
-                                       stringAreaDict["point_down_right"][0]-text_image.size[0])
-                else:
-                    x = random.randint(stringAreaDict["point_down_right"][0] - text_image.size[0],
-                                       stringAreaDict["point_up_left"][0])
-                if random.randint(0,1)==0:#up
-                    y = max(0,stringAreaDict["point_up_left"][1]-text_image.size[1])
-                else :  #down
-                    y = min(stringAreaDict["point_down_right"][1],background_img.size[1]-text_image.size[1])
-            else : #Vertical
-                y = random.randint(stringAreaDict["point_up_left"][1] - text_image.size[1],
-                                   stringAreaDict["point_down_right"][1])
-                if random.randint(0, 1) == 0:  # left
-                    x = stringAreaDict["point_up_left"][0] - text_image.size[0]
-                else:  # right
-                    x = stringAreaDict["point_down_right"][0]
-            return x, y
-        def isCross(x0,y0,text_image,stringArea):
-            for i in range(4):
-                if i==0:
-                    x=x0+text_image.size[0]
-                    y=y0+text_image.size[1]
-                elif i==1:
-                    x=x0
-                    y=y0+text_image.size[1]
-                elif i==2:
-                    x=x0+text_image.size[0]
-                    y=y0
-                else:
-                    x=x0
-                    y=y0
-                for Area in stringArea:
-                    if((Area["point_up_left"][0]<=x and Area["point_up_left"][1]<=y and Area["point_down_right"][0]>=x and Area["point_down_right"][1]>=y)):
-                        return True
+       #西瓜视频
 
-            for j in stringArea:
-                for i in range(4):
-                    if i == 0:
-                        x = j["point_up_left"][0]
-                        y = j["point_up_left"][1]
-                    elif i == 1:
-                        x = j["point_down_right"][0]
-                        y = j["point_up_left"][1]
-                    elif i == 2:
-                        x = j["point_down_right"][0]
-                        y = j["point_down_right"][1]
-                    else:
-                        x = j["point_up_left"][0]
-                        y = j["point_down_right"][1]
-                    if ((x0 <= x and y0 <= y and x0+text_image.size[0]
-                        >= x and y0+text_image.size[1] >= y)):
-                        return True
-            return  False
-        def alignment(background_img,text_imageList,image_dir):
-            stringArea=[]
-            for text_image  in text_imageList:
-                i = 0
-                while (background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
-                    background_img = background_generator.image(image_dir)  # change a big back pic
-                    i += 1
-                    if i == 10:
-                        return None, None
-            head_stringAreaDict={}
-            for idx, text_image in enumerate(text_imageList):
-                if close_string_num==1:#string area non-relate
-                    x0, y0 =getPoint(background_img,text_image)
-                    while(isCross(x0,y0,text_image,stringArea)):
-                        x0,y0=getPoint(background_img,text_image)
-
-                    background_img.paste(text_image, (x0, y0), text_image)
-                    AreaDict= {}
-                    AreaDict['text']=stringList[idx]
-                    AreaDict['point_up_left']=[x0,y0]
-                    AreaDict['point_down_right']=[x0+text_image.size[0],y0+text_image.size[1]]
-                    stringArea.append(AreaDict)
-
-                elif (idx+1) % close_string_num==1 :#head of close string
-                    x0, y0 = getPoint(background_img, text_image)
-                    while (isCross(x0, y0, text_image, stringArea)):
-                        x0, y0 = getPoint(background_img, text_image)
-
-                    background_img.paste(text_image, (x0, y0), text_image)
-                    AreaDict = {}
-                    AreaDict['text'] = stringList[idx]
-                    AreaDict['point_up_left'] = [x0, y0]
-                    AreaDict['point_down_right'] = [x0 + text_image.size[0], y0 + text_image.size[1]]
-                    stringArea.append(AreaDict)
-                    head_stringAreaDict=AreaDict
-                else :
-                    x0, y0 = getClosePoint(background_img, text_image,head_stringAreaDict,close_string_arrangement)
-                    while (isCross(x0, y0, text_image, stringArea)):
-                        x0, y0 = getClosePoint(background_img, text_image,head_stringAreaDict,close_string_arrangement)
-                    background_img.paste(text_image, (x0, y0), text_image)
-                    AreaDict = {}
-                    AreaDict['text'] = stringList[idx]
-                    AreaDict['point_up_left'] = [x0, y0]
-                    AreaDict['point_down_right'] = [x0 + text_image.size[0], y0 + text_image.size[1]]
-                    stringArea.append(AreaDict)
-                    head_stringAreaDict["point_up_left"][0] = min(AreaDict["point_up_left"][0],
-                                                                  head_stringAreaDict["point_up_left"][0])
-                    head_stringAreaDict["point_up_left"][1] = min(AreaDict["point_up_left"][1],
-                                                                  head_stringAreaDict["point_up_left"][1])
-                    head_stringAreaDict["point_down_right"][0] = max(AreaDict["point_down_right"][0],
-                                                                  head_stringAreaDict["point_down_right"][0])
-                    head_stringAreaDict["point_down_right"][1] = max(AreaDict["point_down_right"][1],
-                                                                  head_stringAreaDict["point_down_right"][1])
-            return background_img,stringArea
-        final_image,stringArea =alignment(background_img,text_imageList,image_dir)
+        for idx,stringFormat in enumerate(load_dict['stringFormats']):
+            string = ''
+            for j in range(stringFormat['length']):
+                string += words[idx + j]
+            text_image, text_mask = computer_text_generator.generate(
+                string,
+                font,
+                stringFormat['text_color'],
+                stringFormat['size'],
+                stringFormat['orientation'],
+                stringFormat['space_width'],
+                stringFormat['character_spacing'],
+                stringFormat['fit'],
+                stringFormat['word_split'],
+            )
+            positon=stringFormat['position']
+            #############################
+            # Place text with alignment #
+            #############################
+            def alignment(background_img,text_image,x0,y0,image_dir):
+                stringArea=[]
+                for text_image  in text_imageList:
+                    i = 0
+                    while (background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
+                        background_img = background_generator.image(image_dir)  # change a big back pic
+                        i += 1
+                        if i == 10:
+                            return None, None
+                background_img.paste(text_image, (x0, y0), text_image)
+                AreaDict= {}
+                AreaDict['text']="x"
+                AreaDict['point_up_left']=[x0,y0]
+                AreaDict['point_down_right']=[x0+text_image.size[0],y0+text_image.size[1]]
+                stringArea.append(AreaDict)
+                return background_img,stringArea
+            final_image,stringArea =alignment(background_img,text_image,stringFormat['position']['x'],stringFormat['position']['y'],image_dir)
+            background_img=final_image
         #####################################
         # Generate name for resulting image #
         #####################################
@@ -243,7 +104,6 @@ class FakeTextDataGenerator(object):
             else:
                 print("{} is not a valid name format. Using default.".format(name_format))
                 image_name = "{}_{}.{}".format(text, str(index), extension)
-
             # Save the image
             if out_dir is not None:
                 final_image.convert("RGB").save(os.path.join(out_dir, image_name))
