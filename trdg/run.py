@@ -10,7 +10,7 @@ import sys
 
 from tqdm import tqdm
 from trdg.string_generator import (
-    create_strings_from_dict,
+    create_strings_from_dict_xmy,
     create_strings_from_file,
     create_strings_from_wikipedia,
     create_strings_randomly,
@@ -36,7 +36,7 @@ def parse_arguments():
         description="Generate synthetic text data for text recognition."
     )
     parser.add_argument(
-        "--output_dir", type=str, nargs="?", help="The output directory", default="out/"
+        "--output_dir", type=str, nargs="?", help="The output directory", default="/home/xmy/桌面/123/"
     )
     parser.add_argument(
         "-i",
@@ -355,9 +355,6 @@ def main():
     import json
     with open("./format/format1.json", 'r') as load_f:
         formatDict = json.load(load_f)
-    stringLength=0
-    for stringFormat in formatDict['stringFormats']:
-        stringLength+=stringFormat['length']
 
     if args.use_wikipedia:
         strings = create_strings_from_wikipedia(args.length, args.count, args.language)
@@ -381,20 +378,30 @@ def main():
         ):
             args.name_format = 2
     else:
-        strings = create_strings_from_dict(
-            stringLength, args.random, args.count,1, lang_dict
-        )
+        stringListCount=[]
+        for i in range(args.count):
+            stringList=[]
+            for stringFormat in formatDict['stringFormats']:
+                string=create_strings_from_dict_xmy(stringFormat['word_num'],stringFormat['word_length_max'],stringFormat['word_length_min'],lang_dict)
+                stringList.append(string)
+            stringListCount.append(stringList)
 
-    if args.language == 'ar':
-        from arabic_reshaper import ArabicReshaper
-        arabic_reshaper = ArabicReshaper()
-        strings = [' '.join([arabic_reshaper.reshape(w) for w in s.split(' ')[::-1]]) for s in strings]
-    if args.case == "upper":
-        strings = [x.upper() for x in strings]
-    if args.case == "lower":
-        strings = [x.lower() for x in strings]
 
-    string_count = len(strings)
+
+        # strings = create_strings_from_dict(
+        #     stringLength, args.random, args.count,1, lang_dict
+        # )
+
+    # if args.language == 'ar':
+    #     from arabic_reshaper import ArabicReshaper
+    #     arabic_reshaper = ArabicReshaper()
+    #     strings = [' '.join([arabic_reshaper.reshape(w) for w in s.split(' ')[::-1]]) for s in strings]
+    # if args.case == "upper":
+    #     strings = [x.upper() for x in strings]
+    # if args.case == "lower":
+    #     strings = [x.lower() for x in strings]
+
+    string_count = len(stringListCount)
 
     p = Pool(args.thread_count)
     for _ in tqdm(
@@ -402,7 +409,7 @@ def main():
             FakeTextDataGenerator.generate_from_tuple,
             zip(
                 [i for i in range(0, string_count)],
-                strings,
+                stringListCount,
                 [fonts[rnd.randrange(0, len(fonts))] for _ in range(0, string_count)],
                 [args.output_dir] * string_count,
                 [args.format] * string_count,
@@ -418,13 +425,11 @@ def main():
                 [args.name_format] * string_count,
                 [args.width] * string_count,
                 [args.alignment] * string_count,
-
                 [args.margins] * string_count,
                 [args.fit] * string_count,
                 [args.output_mask] * string_count,
                 [args.word_split] * string_count,
                 [args.image_dir] * string_count,
-
                 [formatDict] * string_count
             ),
         ),

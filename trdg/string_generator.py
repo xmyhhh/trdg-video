@@ -42,6 +42,22 @@ def create_strings_from_dict(length, allow_variable, count, string_num,lang_dict
         strings.append(current_string[:-1])
     return strings
 
+def create_strings_from_dict_xmy(word_num,max,min,lang_dict):
+    """
+        Create all strings by picking X random word in the dictionnary
+    """
+    dict_len = len(lang_dict)
+    string = ""
+    for i in range(word_num):
+        while 1:
+            CurrentString = ""
+            Currentstring = lang_dict[rnd.randrange(dict_len)]
+
+            #print("Currentstring:"+str(len(Currentstring))+"\n"+"max:"+str(max)+"\n"+"min:"+str(min))
+            if len(Currentstring)-1<=max&len(Currentstring)-1>=min:
+                string+=Currentstring
+                break
+    return string
 
 def create_strings_from_wikipedia(minimum_length, count, lang):
     """

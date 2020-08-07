@@ -18,7 +18,7 @@ class FakeTextDataGenerator(object):
     def generate(
         cls,
         index,
-        text,
+        stringList,
         font,
         out_dir,
         size,
@@ -41,25 +41,16 @@ class FakeTextDataGenerator(object):
         image_dir,
         load_dict
     ):
-        text_imageList=[]
-        text_maskList=[]
-        stringList=[]
-        string=''
-        words=text.split('\n')
-        del words[len(words)-1]
 
         ##########################
         # Create picture of text and backgroundImg #
         ##########################
         background_img = background_generator.image(image_dir)
-       #西瓜视频
+
         stringArea = []
         for idx,stringFormat in enumerate(load_dict['stringFormats']):
-            string = ''
-            for j in range(stringFormat['length']):
-                string += words[idx + j]
             text_image, text_mask = computer_text_generator.generate(
-                string,
+                stringList[idx].replace('\n', ''),
                 font,
                 stringFormat['text_color'],
                 stringFormat['size'],
@@ -69,26 +60,17 @@ class FakeTextDataGenerator(object):
                 stringFormat['fit'],
                 stringFormat['word_split'],
             )
-            positon=stringFormat['position']
             #############################
             # Place text with alignment #
             #############################
-            def alignment(background_img,text_image,x0,y0,image_dir,text):
-                for text_image  in text_imageList:
-                    i = 0
-                    while (background_img.size[0] < text_image.size[0] or background_img.size[1] < text_image.size[1]):
-                        background_img = background_generator.image(image_dir)  # change a big back pic
-                        i += 1
-                        if i == 10:
-                            return None, None
+            def alignment(background_img,text_image,x0,y0,text):
                 background_img.paste(text_image, (x0, y0), text_image)
                 AreaDict= {}
                 AreaDict['text']=text
                 AreaDict['point_up_left']=[x0,y0]
                 AreaDict['point_down_right']=[x0+text_image.size[0],y0+text_image.size[1]]
-
                 return background_img,AreaDict
-            final_image,AreaDict =alignment(background_img,text_image,stringFormat['position']['x'],stringFormat['position']['y'],image_dir,string)
+            final_image,AreaDict =alignment(background_img,text_image,stringFormat['position']['x'],stringFormat['position']['y'],stringList[idx])
             stringArea.append(AreaDict)
             background_img=final_image
         #####################################
@@ -118,6 +100,6 @@ class FakeTextDataGenerator(object):
             gt['img_name']=image_name
             gt['annotations']=annotations
             import json
-            utils.file_create("out/"+image_name.replace(extension,"json"),json.dumps(gt))
+            utils.file_create(out_dir+image_name.replace(extension,"json"),json.dumps(gt))
         else:
             print("None img")
